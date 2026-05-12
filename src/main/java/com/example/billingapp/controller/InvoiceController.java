@@ -57,7 +57,7 @@ public class InvoiceController  extends BaseController{
                     @Parameter(name = "endDate", description = "End date", in = ParameterIn.QUERY, required = true)
             }
     )
-    @GetMapping()
+    @GetMapping("/overdue")
     public ResponseEntity<ApiResponse<List<InvoiceResponseDTO>>> getOverdueInvoices(
             @RequestParam Long customerId,
             @RequestParam LocalDate startDate,
@@ -75,7 +75,7 @@ public class InvoiceController  extends BaseController{
                     @Parameter(name = "invoiceId", description = "Invoice id", in = ParameterIn.QUERY, required = true)
             }
     )
-    @GetMapping()
+    @GetMapping("/total-paid")
     public ResponseEntity<ApiResponse<BigDecimal>> getTotalPaidForInvoice(
             @RequestParam Long invoiceId
     ) {
@@ -90,7 +90,7 @@ public class InvoiceController  extends BaseController{
                     @Parameter(name = "invoiceId", description = "Invoice id", in = ParameterIn.QUERY, required = true)
             }
     )
-    @GetMapping()
+    @GetMapping("/payment-status")
     public ResponseEntity<ApiResponse<Boolean>> checkIfInvoiceFullyPaid(
             @RequestParam Long invoiceId
     ) {
