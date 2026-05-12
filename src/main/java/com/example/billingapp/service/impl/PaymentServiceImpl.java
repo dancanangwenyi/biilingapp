@@ -3,6 +3,7 @@ package com.example.billingapp.service.impl;
 import com.example.billingapp.dto.request.CreatePaymentRequestDTO;
 import com.example.billingapp.dto.request.UpdateInvoiceRequestDTO;
 import com.example.billingapp.dto.response.PaymentResponseDTO;
+import com.example.billingapp.exception.BusinessRuleViolationException;
 import com.example.billingapp.exception.ResourceNotFoundException;
 import com.example.billingapp.mapper.PaymentMapper;
 import com.example.billingapp.model.Invoice;
@@ -20,6 +21,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Optional;
 
 
@@ -32,7 +35,6 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentMapper paymentMapper;
     private final TransactionNumberGenerator transactionNumberGenerator;
     private final InvoiceRepository invoiceRepository;
-    private final InvoiceService invoiceService;
 
 
 
@@ -63,7 +65,32 @@ public class PaymentServiceImpl implements PaymentService {
                 .paymentDate(request.paymentDate())
                 .build();
 
-        invoiceService.updateInvoiceById(invoice.getId(), invoiceRequestDTO);
+        // Calculate total payments already made
+        BigDecimal existingTotalPaid = invoice.getTotalPaid();
+
+        BigDecimal paymentAmount = request.amount();
+        LocalDate paymentDate = request.paymentDate();
+
+        // Payment amount must be positive
+        if (paymentAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessRuleViolationException(
+                    "Payment amount must be positive. Provided: " + paymentAmount);
+        }
+
+        // Payment's date must be on or before current date
+        if (paymentDate != null && paymentDate.isAfter(LocalDate.now())) {
+            throw new BusinessRuleViolationException(
+                    "Payment date cannot be in the future. Provided: " + paymentDate);
+        }
+
+        // Total payments + previous payments must not exceed invoice amount
+        BigDecimal newTotalPaid = existingTotalPaid.add(paymentAmount);
+        if (newTotalPaid.compareTo(invoice.getAmount()) > 0) {
+            throw new BusinessRuleViolationException(
+                    String.format("Payment would exceed invoice amount. " +
+                                    "Invoice amount: %.2f, Already paid: %.2f, Attempting to pay: %.2f",
+                            invoice.getAmount(), existingTotalPaid, paymentAmount));
+        }
 
         Payment payment = new Payment();
         payment.setPaymentMethod(request.paymentMethod());

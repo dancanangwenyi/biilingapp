@@ -68,45 +68,45 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceMapper.toResponseDTO(savedInvoice);
     }
 
-    @Override
-    public void updateInvoiceById(Long invoiceId, UpdateInvoiceRequestDTO request) {
-
-        BigDecimal paymentAmount = request.paymentAmount();
-        LocalDate paymentDate = request.paymentDate();
-
-        log.info("Processing payment of {} for invoice ID: {}", paymentAmount, invoiceId);
-
-        Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found with ID: " + invoiceId));
-
-        // Calculate total payments already made
-        BigDecimal existingTotalPaid = invoice.getTotalPaid();
-
-        // Payment amount must be positive
-        if (paymentAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessRuleViolationException(
-                    "Payment amount must be positive. Provided: " + paymentAmount);
-        }
-
-        // Payment's date must be on or before current date
-        if (paymentDate != null && paymentDate.isAfter(LocalDate.now())) {
-            throw new BusinessRuleViolationException(
-                    "Payment date cannot be in the future. Provided: " + paymentDate);
-        }
-
-        // Total payments + previous payments must not exceed invoice amount
-        BigDecimal newTotalPaid = existingTotalPaid.add(paymentAmount);
-        if (newTotalPaid.compareTo(invoice.getAmount()) > 0) {
-            throw new BusinessRuleViolationException(
-                    String.format("Payment would exceed invoice amount. " +
-                                    "Invoice amount: %.2f, Already paid: %.2f, Attempting to pay: %.2f",
-                            invoice.getAmount(), existingTotalPaid, paymentAmount));
-        }
-
-        invoice.updateStatus();
-        invoiceRepository.save(invoice);
-        log.info("Invoice {} status updated to: {}", invoice.getId(), invoice.getStatus());
-    }
+//    @Override
+//    public void updateInvoiceById(Long invoiceId, UpdateInvoiceRequestDTO request) {
+//
+//        BigDecimal paymentAmount = request.paymentAmount();
+//        LocalDate paymentDate = request.paymentDate();
+//
+//        log.info("Processing payment of {} for invoice ID: {}", paymentAmount, invoiceId);
+//
+//        Invoice invoice = invoiceRepository.findById(invoiceId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found with ID: " + invoiceId));
+//
+//        // Calculate total payments already made
+//        BigDecimal existingTotalPaid = invoice.getTotalPaid();
+//
+//        // Payment amount must be positive
+//        if (paymentAmount.compareTo(BigDecimal.ZERO) <= 0) {
+//            throw new BusinessRuleViolationException(
+//                    "Payment amount must be positive. Provided: " + paymentAmount);
+//        }
+//
+//        // Payment's date must be on or before current date
+//        if (paymentDate != null && paymentDate.isAfter(LocalDate.now())) {
+//            throw new BusinessRuleViolationException(
+//                    "Payment date cannot be in the future. Provided: " + paymentDate);
+//        }
+//
+//        // Total payments + previous payments must not exceed invoice amount
+//        BigDecimal newTotalPaid = existingTotalPaid.add(paymentAmount);
+//        if (newTotalPaid.compareTo(invoice.getAmount()) > 0) {
+//            throw new BusinessRuleViolationException(
+//                    String.format("Payment would exceed invoice amount. " +
+//                                    "Invoice amount: %.2f, Already paid: %.2f, Attempting to pay: %.2f",
+//                            invoice.getAmount(), existingTotalPaid, paymentAmount));
+//        }
+//
+//        invoice.updateStatus();
+//        invoiceRepository.save(invoice);
+//        log.info("Invoice {} status updated to: {}", invoice.getId(), invoice.getStatus());
+//    }
 
 
     @Override
