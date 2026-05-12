@@ -17,7 +17,7 @@ public interface InvoiceService {
 
     InvoiceResponseDTO createInvoice(@Valid CreateInvoiceRequestDTO request);
 
-    InvoiceResponseDTO updateInvoiceById(Long id, @Valid UpdateInvoiceRequestDTO request);
+    void updateInvoiceById(Long id, @Valid UpdateInvoiceRequestDTO request);
 
     InvoiceResponseDTO getInvoiceById(Long id);
 

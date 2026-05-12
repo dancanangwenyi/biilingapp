@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/v1/customers")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Account Management", description = "Endpoints for managing customers")
+@Tag(name = "Customers Management", description = "Endpoints for managing customers")
 public class CustomerController  extends BaseController{
 
     private final CustomerService customerService;

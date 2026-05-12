@@ -17,11 +17,15 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/invoices")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Account Management", description = "Endpoints for managing invoices")
+@Tag(name = "Invoice Management", description = "Endpoints for managing invoices")
 public class InvoiceController  extends BaseController{
 
     private final InvoiceService invoiceService;
@@ -45,6 +49,58 @@ public class InvoiceController  extends BaseController{
     }
 
     @Operation(
+            summary = "Fetch overdue invoices",
+            description = "Fetch overdue invoices",
+            parameters = {
+                    @Parameter(name = "customerId", description = "Customer id", in = ParameterIn.QUERY, required = true),
+                    @Parameter(name = "startDate", description = "Start date", in = ParameterIn.QUERY, required = true),
+                    @Parameter(name = "endDate", description = "End date", in = ParameterIn.QUERY, required = true)
+            }
+    )
+    @GetMapping()
+    public ResponseEntity<ApiResponse<List<InvoiceResponseDTO>>> getOverdueInvoices(
+            @RequestParam Long customerId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate
+    ) {
+
+        List<InvoiceResponseDTO> invoices =invoiceService.getOverdueInvoices(customerId, startDate, endDate);
+        return wrap(invoices);
+    }
+
+    @Operation(
+            summary = "Fetch total paid for invoice",
+            description = "Fetch total paid for invoice",
+            parameters = {
+                    @Parameter(name = "invoiceId", description = "Invoice id", in = ParameterIn.QUERY, required = true)
+            }
+    )
+    @GetMapping()
+    public ResponseEntity<ApiResponse<BigDecimal>> getTotalPaidForInvoice(
+            @RequestParam Long invoiceId
+    ) {
+        BigDecimal amount =invoiceService.getTotalPaidForInvoice(invoiceId);
+        return wrap(amount);
+    }
+
+    @Operation(
+            summary = "Check if invoice is fully paid",
+            description = "Check if invoice is fully paid",
+            parameters = {
+                    @Parameter(name = "invoiceId", description = "Invoice id", in = ParameterIn.QUERY, required = true)
+            }
+    )
+    @GetMapping()
+    public ResponseEntity<ApiResponse<Boolean>> checkIfInvoiceFullyPaid(
+            @RequestParam Long invoiceId
+    ) {
+        Boolean amount =invoiceService.isInvoiceFullyPaid(invoiceId);
+        return wrap(amount);
+    }
+
+
+
+    @Operation(
             summary = "Create a new invoice",
             description = "Create a new invoice)"
     )
@@ -54,17 +110,6 @@ public class InvoiceController  extends BaseController{
         return wrap(invoiceResponse);
     }
 
-    @Operation(
-            summary = "Update invoice",
-            description = "Update invoice)"
-    )
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<InvoiceResponseDTO>> updateInvoiceById(
-            @Parameter(description = "Invoice Id") @PathVariable Long id,
-            @Valid @RequestBody UpdateInvoiceRequestDTO request) {
-        InvoiceResponseDTO invoiceResponse =invoiceService.updateInvoiceById(id, request);
-        return wrap(invoiceResponse);
-    }
 
     @Operation(
             summary = "Fetch invoice by id",

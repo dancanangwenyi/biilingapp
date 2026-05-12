@@ -11,7 +11,6 @@ import com.example.billingapp.model.Customer;
 import com.example.billingapp.model.Invoice;
 import com.example.billingapp.repository.CustomerRepository;
 import com.example.billingapp.repository.InvoiceRepository;
-import com.example.billingapp.repository.PaymentRepository;
 import com.example.billingapp.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +31,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final CustomerRepository customerRepository;
-    private final PaymentRepository paymentRepository;
     private final InvoiceMapper invoiceMapper;
+    private final PaymentServiceImpl paymentService;
 
  
     @Override
@@ -70,7 +69,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public InvoiceResponseDTO updateInvoiceById(Long invoiceId, UpdateInvoiceRequestDTO request) {
+    public void updateInvoiceById(Long invoiceId, UpdateInvoiceRequestDTO request) {
 
         BigDecimal paymentAmount = request.paymentAmount();
         LocalDate paymentDate = request.paymentDate();
@@ -107,7 +106,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.updateStatus();
         invoiceRepository.save(invoice);
         log.info("Invoice {} status updated to: {}", invoice.getId(), invoice.getStatus());
-        return null;
     }
 
 
